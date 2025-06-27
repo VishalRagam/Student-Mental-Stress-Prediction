@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stress Level Predictor</title>
+  <style>
+    body {
+      font-family: Arial;
+      background-color: #f4f4f4;
+      padding: 20px;
+    }
+    .container {
+      max-width: 500px;
+      background: #fff;
+      padding: 20px;
+      margin: auto;
+      border-radius: 8px;
+      box-shadow: 0 0 10px #ccc;
+    }
+    select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    .result {
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Stress Level Predictor</h2>
+    <form id="stressForm">
+      <label>Academic Workload:
+        <select id="academic" required>
+          <option value="">Select</option>
+          <option value="1">1 (Low)</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5 (High)</option>
+        </select>
+      </label>
+      <label>Sleep Quality:
+        <select id="sleep" required>
+          <option value="">Select</option>
+          <option value="1">1 (Poor)</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5 (Excellent)</option>
+        </select>
+      </label>
+      <label>Financial Strain:
+        <select id="finance" required>
+          <option value="">Select</option>
+          <option value="1">1 (Low)</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5 (High)</option>
+        </select>
+      </label>
+      <label>Social Support:
+        <select id="social" required>
+          <option value="">Select</option>
+          <option value="1">1 (Low)</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5 (High)</option>
+        </select>
+      </label>
+      <label>Anxiety Level:
+        <select id="anxiety" required>
+          <option value="">Select</option>
+          <option value="1">1 (Low)</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5 (High)</option>
+        </select>
+      </label>
+
+      <button type="submit">Predict Stress Level</button>
+    </form>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('stressForm');
+    const resultBox = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const data = {
+        AcademicWorkload: parseInt(document.getElementById('academic').value),
+        SleepQuality: parseInt(document.getElementById('sleep').value),
+        FinancialStrain: parseInt(document.getElementById('finance').value),
+        SocialSupport: parseInt(document.getElementById('social').value),
+        AnxietyLevel: parseInt(document.getElementById('anxiety').value)
+      };
+
+      try {
+        const response = await fetch('http://localhost:5000/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        console.log("Response:", result);
+
+        if (result.message) {
+          resultBox.textContent = result.message;
+          if (result.stress_level === 0) resultBox.style.color = 'green';
+          else if (result.stress_level === 1) resultBox.style.color = 'orange';
+          else resultBox.style.color = 'red';
+        } else if (result.error) {
+          resultBox.textContent = `Error: ${result.error}`;
+          resultBox.style.color = 'black';
+        } else {
+          resultBox.textContent = 'Unexpected response.';
+          resultBox.style.color = 'black';
+        }
+      } catch (error) {
+        resultBox.textContent = 'Could not connect to server.';
+        resultBox.style.color = 'black';
+        console.error(error);
+      }
+    });
+  </script>
+</body>
+</html>
